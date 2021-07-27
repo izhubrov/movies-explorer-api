@@ -1,35 +1,60 @@
 const { celebrate, Joi } = require('celebrate');
-const { urlRegExp, passwordRegExp } = require('../utils/utils');
+const {
+  urlRegExp, passwordRegExp, ruRegExp, engRegExp,
+} = require('../utils/utils');
 const errorMessages = require('../utils/celebrateErrorMessages');
 
 const {
-  general, required, email, password, id, text, url,
+  string, number, required, email, password, id, text, url, ru, eng,
 } = errorMessages;
 
 const items = {
   email: Joi.string().trim().label('Почта').email()
     .required()
-    .messages({ ...general, ...required, ...email }),
+    .messages({ ...string, ...required, ...email }),
   password: Joi.string().trim().label('Пароль').required()
     .pattern(new RegExp(passwordRegExp))
-    .messages({ ...general, ...required, ...password }),
-  userId: Joi.string().trim().label('ID Пользователя').hex()
-    .length(24)
-    .messages({ ...general, ...id }),
-  name: Joi.string().trim().label('Имя').min(2)
+    .messages({ ...string, ...required, ...password }),
+  name: Joi.string().trim().label('Имя').required()
+    .min(2)
     .max(30)
-    .messages({ ...general, ...text }),
-  about: Joi.string().trim().label('О себе').min(2)
-    .max(30)
-    .messages({ ...general, ...text }),
-  avatar: Joi.string().trim().label('Ссылка на Аватар').pattern(new RegExp(urlRegExp))
-    .messages({ ...general, ...url }),
-  link: Joi.string().trim().label('Ссылка на Изображение').required()
+    .messages({ ...string, ...text }),
+  country: Joi.string().trim().label('Страна создания фильма').required()
+    .messages({ ...string, ...required }),
+  director: Joi.string().trim().label('Режиссер фильма').required()
+    .messages({ ...string, ...required }),
+  duration: Joi.number().label('Длительность фильма').required()
+    .messages({ ...number, ...required }),
+  year: Joi.string().trim().label('Год выпуска фильма').required()
+    .messages({ ...string, ...required }),
+  description: Joi.string().trim().label('Описание фильма').required()
+    .messages({ ...string, ...required }),
+  image: Joi.string().trim().label('Ссылка на постер к фильму')
+    .required()
     .pattern(new RegExp(urlRegExp))
-    .messages({ ...general, ...url }),
-  cardId: Joi.string().trim().label('ID Карточки').hex()
+    .messages({ ...string, ...required, ...url }),
+  trailer: Joi.string().trim().label('Ссылка на трейлер фильма')
+    .required()
+    .pattern(new RegExp(urlRegExp))
+    .messages({ ...string, ...required, ...url }),
+  thumbnail: Joi.string().trim().label('Миниатюрное изображение постера к фильму')
+    .required()
+    .pattern(new RegExp(urlRegExp))
+    .messages({ ...string, ...required, ...url }),
+  userId: Joi.string().trim().label('ID Пользователя').required()
+    .hex()
     .length(24)
-    .messages({ ...general, ...id }),
+    .messages({ ...string, ...id }),
+  movieId: Joi.string().trim().label('ID фильма').required()
+    .hex()
+    .length(24)
+    .messages({ ...string, ...id }),
+  nameRU: Joi.string().trim().label('Название фильма на русском языке').required()
+    .pattern(new RegExp(ruRegExp))
+    .messages({ ...string, ...required, ...ru }),
+  nameEN: Joi.string().trim().label('Название фильма на английском языке').required()
+    .pattern(new RegExp(engRegExp))
+    .messages({ ...string, ...required, ...eng }),
 };
 
 // Функция ниже конструирует нужный объект из параметров на входе и внутреннего объекта,

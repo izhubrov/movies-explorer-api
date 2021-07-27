@@ -6,19 +6,19 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { isCelebrateError } = require('celebrate');
 const usersRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
+const moviesRouter = require('./routes/movies');
 const { login, createUser, logout } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found-err');
 const ValidationError = require('./errors/validation-err');
-const { mongoUrl, mongoSettings, corsOptions } = require('./utils/utils');
+const { mongoSettings, corsOptions } = require('./utils/utils');
 const errorMessages = require('./utils/celebrateErrorMessages');
 const celebrateValidation = require('./helpers/celebrateValidation');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
-const { NODE_ENV, PORT } = process.env;
-mongoose.connect(mongoUrl, mongoSettings);
+const { NODE_ENV, PORT, DATABASE_URL } = process.env;
+mongoose.connect(NODE_ENV === 'production' ? DATABASE_URL : 'mongodb://localhost:27017/mestodb', mongoSettings);
 
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
@@ -36,7 +36,7 @@ app.post('/signin', celebrateValidation({ body: { email: null, password: null } 
 app.post('/signup', celebrateValidation({ body: { email: null, password: null } }), createUser);
 app.delete('/logout', logout);
 app.use('/users', auth, usersRouter);
-app.use('/cards', auth, cardsRouter);
+app.use('/cards', auth, moviesRouter);
 app.use('*', (req, res, next) => {
   const error = new NotFoundError('Запрашиваемый ресурс не найден');
   next(error);

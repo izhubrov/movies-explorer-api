@@ -1,8 +1,13 @@
 const errorMessages = {
   incorrectData: 'Переданы некорректные данные. ',
-  general: {
+  string: {
     'string.base': 'Поле {#label} должно быть строкой',
     'string.empty': 'Поле {#label} не может быть пустым',
+  },
+  number: {
+    'number.base': 'Поле {#label} должно быть числом',
+    'number.integer': 'Поле {#label} не может дробным числом',
+    'number.positive': 'Поле {#label} не может отрицательным',
   },
   required: {
     'any.required': 'Поле {#label} является обязательным',
@@ -23,6 +28,12 @@ const errorMessages = {
   },
   url: {
     'string.pattern.base': 'Поле {#label} не соответствует шаблону ссылки',
+  },
+  ru: {
+    'string.pattern.base': 'Поле {#label} должно состоять из букв русского алфавита',
+  },
+  eng: {
+    'string.pattern.base': 'Поле {#label} должно состоять из букв английского алфавита',
   },
 };
 

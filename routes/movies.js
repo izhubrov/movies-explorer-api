@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const {
   readCards, createCard, removeCard, likeCard, dislikeCard,
-} = require('../controllers/cards');
+} = require('../controllers/movies');
 const celebrateValidation = require('../helpers/celebrateValidation');
 
 router.get('/', readCards);

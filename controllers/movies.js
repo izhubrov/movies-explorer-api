@@ -1,10 +1,10 @@
-const Card = require('../models/card');
+const Movie = require('../models/movie');
 const ForbiddenError = require('../errors/forbidden-err');
 const NotFoundError = require('../errors/not-found-err');
 
 const readCards = async (req, res, next) => {
   try {
-    const cards = await Card.find({}).populate(['likes', 'owner']).sort('-createdAt');
+    const cards = await Movie.find({}).populate(['likes', 'owner']).sort('-createdAt');
     res.send(cards);
   } catch (error) {
     next(error);
@@ -14,7 +14,7 @@ const readCards = async (req, res, next) => {
 const createCard = async (req, res, next) => {
   const { name, link } = req.body;
   try {
-    const newCard = await Card.create({ name, link, owner: req.user._id });
+    const newCard = await Movie.create({ name, link, owner: req.user._id });
     const newCardWithOwner = await newCard.populate('owner').execPopulate();
     res.send(newCardWithOwner);
   } catch (error) {
@@ -24,7 +24,7 @@ const createCard = async (req, res, next) => {
 
 const removeCard = async (req, res, next) => {
   try {
-    const cardToRemove = await Card.findById(req.params.cardId);
+    const cardToRemove = await Movie.findById(req.params.cardId);
 
     if (!cardToRemove) throw new NotFoundError('Запрашиваемая карточка не найдена');
 
@@ -32,7 +32,7 @@ const removeCard = async (req, res, next) => {
       throw new ForbiddenError('Недостаточно прав');
     }
 
-    await Card.findByIdAndRemove(req.params.cardId);
+    await Movie.findByIdAndRemove(req.params.cardId);
     res.send({ message: 'Пост удалён' });
   } catch (error) {
     next(error);
@@ -41,7 +41,7 @@ const removeCard = async (req, res, next) => {
 
 const likeCard = async (req, res, next) => {
   try {
-    const cardToLike = await Card.findByIdAndUpdate(
+    const cardToLike = await Movie.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
       { new: true },
@@ -58,7 +58,7 @@ const likeCard = async (req, res, next) => {
 
 const dislikeCard = async (req, res, next) => {
   try {
-    const cardToLike = await Card.findByIdAndUpdate(
+    const cardToLike = await Movie.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
       { new: true },
