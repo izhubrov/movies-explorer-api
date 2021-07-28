@@ -24,9 +24,12 @@ const login = async (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : randomString,
         { expiresIn: '7d' },
       );
-      res.status(200).cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 7, httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
-      })
+      // res.status(200).cookie('jwt', token, {
+      //   maxAge: 3600000 * 24 * 7, httpOnly: true, domain: '.nomoredomains.monster',
+      // secure: true, path: '/',
+      // })
+      //   .send({ message: 'Вы успешно авторизованы!' });
+      res.status(200).cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, secure: true })
         .send({ message: 'Вы успешно авторизованы!' });
     }
   } catch (error) {
@@ -59,29 +62,32 @@ const logout = async (req, res, next) => {
         throw new UnauthorizedError('Необходима авторизация');
       }
     });
-    res.status(200).clearCookie('jwt', {
-      httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
-    })
+    // res.status(200).clearCookie('jwt', {
+    //   httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
+    // })
+    //   .send({ message: 'Вы успешно вышли из системы!' });
+    res.status(200).clearCookie('jwt', { httpOnly: true, secure: true })
       .send({ message: 'Вы успешно вышли из системы!' });
   } catch (error) {
     next(error);
   }
 };
 
-const readUsers = async (req, res, next) => {
+const createUser = async (req, res, next) => {
   try {
-    const users = await User.find({});
-    res.send(users);
-  } catch (error) {
-    next(error);
-  }
-};
+    const {
+      email, password, name,
+    } = req.body;
 
-const readUserInfo = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.params.userId);
-    if (!user) throw new NotFoundError('Запрашиваемый пользователь не найден');
-    res.send(user);
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name, email, password: hash,
+    });
+
+    res.send({
+      name: user.name, email: user.email,
+    });
   } catch (error) {
     next(error);
   }
@@ -98,28 +104,8 @@ const readCurrentUserInfo = async (req, res, next) => {
   }
 };
 
-const createUser = async (req, res, next) => {
-  try {
-    const {
-      name, about, avatar, email, password,
-    } = req.body;
-
-    const hash = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      name, about, avatar, email, password: hash,
-    });
-
-    res.send({
-      name: user.name, about: user.about, avatar: user.avatar, email: user.email,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 const setUserInfo = async (req, res, next) => {
-  let { name: newName, about: newAbout } = req.body;
+  let { email: newEmail, name: newName } = req.body;
   const id = req.user._id;
   try {
     // проверим, существует ли пользователь и
@@ -127,11 +113,11 @@ const setUserInfo = async (req, res, next) => {
     const user = await User.findById(id);
     if (!user) throw new NotFoundError('Текущий пользователь не найден');
     newName = newName || user.name;
-    newAbout = newAbout || user.about;
+    newEmail = newEmail || user.email;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { name: newName, about: newAbout },
+      { name: newName, email: newEmail },
       {
         new: true,
         runValidators: true,
@@ -145,32 +131,10 @@ const setUserInfo = async (req, res, next) => {
   }
 };
 
-const setUserAvatar = async (req, res, next) => {
-  const { avatar: newAvatar } = req.body;
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { avatar: newAvatar },
-      {
-        new: true,
-        runValidators: true,
-        upsert: false,
-      },
-    );
-    if (!user) throw new NotFoundError('Текущий пользователь не найден');
-    res.send(user);
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   login,
   logout,
-  readUsers,
-  readUserInfo,
   readCurrentUserInfo,
   createUser,
   setUserInfo,
-  setUserAvatar,
 };

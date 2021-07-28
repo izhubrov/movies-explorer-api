@@ -2,81 +2,69 @@ const Movie = require('../models/movie');
 const ForbiddenError = require('../errors/forbidden-err');
 const NotFoundError = require('../errors/not-found-err');
 
-const readCards = async (req, res, next) => {
+const readMovies = async (req, res, next) => {
   try {
-    const cards = await Movie.find({}).populate(['likes', 'owner']).sort('-createdAt');
-    res.send(cards);
+    const movies = await Movie.find({}).populate(['owner']);
+    res.send(movies);
   } catch (error) {
     next(error);
   }
 };
 
-const createCard = async (req, res, next) => {
-  const { name, link } = req.body;
+const createMovie = async (req, res, next) => {
+  const {
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailer,
+    nameRU,
+    nameEN,
+    thumbnail,
+    movieId,
+  } = req.body;
   try {
-    const newCard = await Movie.create({ name, link, owner: req.user._id });
-    const newCardWithOwner = await newCard.populate('owner').execPopulate();
-    res.send(newCardWithOwner);
+    const newMovie = await Movie.create({
+      country,
+      director,
+      duration,
+      year,
+      description,
+      image,
+      trailer,
+      nameRU,
+      nameEN,
+      thumbnail,
+      movieId,
+    });
+    const newMovieWithOwner = await newMovie.populate('owner').execPopulate();
+    res.send(newMovieWithOwner);
   } catch (error) {
     next(error);
   }
 };
 
-const removeCard = async (req, res, next) => {
+const removeLikedMovie = async (req, res, next) => {
   try {
-    const cardToRemove = await Movie.findById(req.params.cardId);
+    const movieToRemove = await Movie.findById(req.params.movieId);
 
-    if (!cardToRemove) throw new NotFoundError('Запрашиваемая карточка не найдена');
+    if (!movieToRemove) throw new NotFoundError('Запрашиваемый фильм не найден');
 
-    if (cardToRemove.owner._id.toHexString() !== req.user._id) {
+    if (movieToRemove.owner._id.toHexString() !== req.user._id) {
       throw new ForbiddenError('Недостаточно прав');
     }
 
-    await Movie.findByIdAndRemove(req.params.cardId);
-    res.send({ message: 'Пост удалён' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const likeCard = async (req, res, next) => {
-  try {
-    const cardToLike = await Movie.findByIdAndUpdate(
-      req.params.cardId,
-      { $addToSet: { likes: req.user._id } },
-      { new: true },
-    )
-      .populate(['likes', 'owner']);
-
-    if (!cardToLike) throw new NotFoundError('Запрашиваемая карточка не найдена');
-
-    res.send(cardToLike);
-  } catch (error) {
-    next(error);
-  }
-};
-
-const dislikeCard = async (req, res, next) => {
-  try {
-    const cardToLike = await Movie.findByIdAndUpdate(
-      req.params.cardId,
-      { $pull: { likes: req.user._id } },
-      { new: true },
-    )
-      .populate(['likes', 'owner']);
-
-    if (!cardToLike) throw new NotFoundError('Запрашиваемая карточка не найдена');
-
-    res.send(cardToLike);
+    await Movie.findByIdAndRemove(req.params.movieId);
+    res.send({ message: 'Фильм исключен из списка понравившихся' });
   } catch (error) {
     next(error);
   }
 };
 
 module.exports = {
-  readCards,
-  createCard,
-  removeCard,
-  likeCard,
-  dislikeCard,
+  readMovies,
+  createMovie,
+  removeLikedMovie,
 };

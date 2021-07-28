@@ -6,11 +6,12 @@ const mongoSettings = {
 };
 
 const corsOptions = {
-  origin: [
-    'https://izhubrov-mesto.nomoredomains.club',
-    'http://localhost:3000',
-    'https://web.postman.co',
-  ],
+  // origin: [
+  //   'https://izhubrov-mesto.nomoredomains.club',
+  //   'http://localhost:3000',
+  //   'https://web.postman.co',
+  // ],
+  origin: '*',
   credentials: true,
 };
 

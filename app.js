@@ -11,7 +11,7 @@ const { login, createUser, logout } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found-err');
 const ValidationError = require('./errors/validation-err');
-const { mongoSettings, corsOptions } = require('./utils/utils');
+const { mongoSettings } = require('./utils/utils');
 const errorMessages = require('./utils/celebrateErrorMessages');
 const celebrateValidation = require('./helpers/celebrateValidation');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 app.get('/crash-test', () => {
   setTimeout(() => {
@@ -36,7 +36,7 @@ app.post('/signin', celebrateValidation({ body: { email: null, password: null } 
 app.post('/signup', celebrateValidation({ body: { email: null, password: null } }), createUser);
 app.delete('/logout', logout);
 app.use('/users', auth, usersRouter);
-app.use('/cards', auth, moviesRouter);
+app.use('/movies', auth, moviesRouter);
 app.use('*', (req, res, next) => {
   const error = new NotFoundError('Запрашиваемый ресурс не найден');
   next(error);

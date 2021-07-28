@@ -1,13 +1,25 @@
 const router = require('express').Router();
 const {
-  readCards, createCard, removeCard, likeCard, dislikeCard,
+  readMovies, createMovie, removeLikedMovie,
 } = require('../controllers/movies');
 const celebrateValidation = require('../helpers/celebrateValidation');
 
-router.get('/', readCards);
-router.post('/', celebrateValidation({ body: { name: null, link: null } }), createCard);
-router.delete('/:cardId', celebrateValidation({ params: { cardId: null } }), removeCard);
-router.put('/:cardId/likes', celebrateValidation({ params: { cardId: null } }), likeCard);
-router.delete('/:cardId/likes', celebrateValidation({ params: { cardId: null } }), dislikeCard);
+router.get('/', readMovies);
+router.post('/', celebrateValidation({
+  body: {
+    country: null,
+    director: null,
+    duration: null,
+    year: null,
+    description: null,
+    image: null,
+    trailer: null,
+    nameRU: null,
+    nameEN: null,
+    thumbnail: null,
+    movieId: null,
+  },
+}), createMovie);
+router.delete('/:movieId', celebrateValidation({ params: { movieId: null } }), removeLikedMovie);
 
 module.exports = router;
