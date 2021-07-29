@@ -1,31 +1,31 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-// const cors = require('cors');
+const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { isCelebrateError } = require('celebrate');
 const usersRouter = require('./routes/users');
 const moviesRouter = require('./routes/movies');
-const { login, createUser, logout } = require('./controllers/users');
+const { login, createUser, signout } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found-err');
 const ValidationError = require('./errors/validation-err');
-const { mongoSettings } = require('./utils/utils');
+const { mongoSettings, corsOptions } = require('./utils/utils');
 const errorMessages = require('./utils/celebrateErrorMessages');
 const celebrateValidation = require('./helpers/celebrateValidation');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 const { NODE_ENV, PORT, DATABASE_URL } = process.env;
-mongoose.connect(NODE_ENV === 'production' ? DATABASE_URL : 'mongodb://localhost:27017/mestodb', mongoSettings);
+mongoose.connect(NODE_ENV === 'production' ? DATABASE_URL : 'mongodb://localhost:27017/movies-explorerDB', mongoSettings);
 
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.get('/crash-test', () => {
   setTimeout(() => {
@@ -33,8 +33,8 @@ app.get('/crash-test', () => {
   }, 0);
 });
 app.post('/signin', celebrateValidation({ body: { email: null, password: null } }), login);
-app.post('/signup', celebrateValidation({ body: { email: null, password: null } }), createUser);
-app.delete('/logout', logout);
+app.post('/signup', celebrateValidation({ body: { email: null, password: null, name: null } }), createUser);
+app.post('/signout', celebrateValidation({ body: { email: null } }), signout);
 app.use('/users', auth, usersRouter);
 app.use('/movies', auth, moviesRouter);
 app.use('*', (req, res, next) => {

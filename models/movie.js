@@ -34,20 +34,23 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true,
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+    }],
+    default: [],
   },
   movieId: {
     type: mongoose.Schema.Types.ObjectId,
-    // type: String, Если id будет не монгус...
+    // type: String, Если id будет не монго...
     required: true,
+    unique: true,
   },
   nameRU: {
     type: String,
     required: true,
   },
-  nameEn: {
+  nameEN: {
     type: String,
     required: true,
   },

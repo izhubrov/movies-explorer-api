@@ -29,15 +29,15 @@ const login = async (req, res, next) => {
       // secure: true, path: '/',
       // })
       //   .send({ message: 'Вы успешно авторизованы!' });
-      res.status(200).cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, secure: true })
-        .send({ message: 'Вы успешно авторизованы!' });
+      res.status(200).cookie('jwt', token, { maxAge: 3600000 * 24 * 7 })
+        .send({ name: user.name, message: 'Вы успешно авторизованы!' });
     }
   } catch (error) {
     next(error);
   }
 };
 
-const logout = async (req, res, next) => {
+const signout = async (req, res, next) => {
   try {
     const { email } = req.body;
     const { jwt } = req.cookies;
@@ -66,7 +66,7 @@ const logout = async (req, res, next) => {
     //   httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
     // })
     //   .send({ message: 'Вы успешно вышли из системы!' });
-    res.status(200).clearCookie('jwt', { httpOnly: true, secure: true })
+    res.status(200).clearCookie('jwt')
       .send({ message: 'Вы успешно вышли из системы!' });
   } catch (error) {
     next(error);
@@ -112,6 +112,7 @@ const setUserInfo = async (req, res, next) => {
     // если какие-либо поля Имя или О себе не пераданы, берем их из существующего пользователя
     const user = await User.findById(id);
     if (!user) throw new NotFoundError('Текущий пользователь не найден');
+
     newName = newName || user.name;
     newEmail = newEmail || user.email;
 
@@ -133,7 +134,7 @@ const setUserInfo = async (req, res, next) => {
 
 module.exports = {
   login,
-  logout,
+  signout,
   readCurrentUserInfo,
   createUser,
   setUserInfo,

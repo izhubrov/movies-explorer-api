@@ -18,7 +18,7 @@ const items = {
   name: Joi.string().trim().label('Имя').required()
     .min(2)
     .max(30)
-    .messages({ ...string, ...text }),
+    .messages({ ...string, ...required, ...text }),
   country: Joi.string().trim().label('Страна создания фильма').required()
     .messages({ ...string, ...required }),
   director: Joi.string().trim().label('Режиссер фильма').required()

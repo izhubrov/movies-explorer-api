@@ -11,7 +11,7 @@ const readMovies = async (req, res, next) => {
   }
 };
 
-const createMovie = async (req, res, next) => {
+const createOrLikeExistedMovie = async (req, res, next) => {
   const {
     country,
     director,
@@ -25,38 +25,54 @@ const createMovie = async (req, res, next) => {
     thumbnail,
     movieId,
   } = req.body;
+  const userId = req.user._id;
+
   try {
-    const newMovie = await Movie.create({
-      country,
-      director,
-      duration,
-      year,
-      description,
-      image,
-      trailer,
-      nameRU,
-      nameEN,
-      thumbnail,
-      movieId,
-    });
-    const newMovieWithOwner = await newMovie.populate('owner').execPopulate();
-    res.send(newMovieWithOwner);
+    let newOrModifiedMovie = await Movie.findOne({ movieId });
+
+    if (!newOrModifiedMovie) {
+      newOrModifiedMovie = await Movie.create({
+        country,
+        director,
+        duration,
+        year,
+        description,
+        image,
+        trailer,
+        nameRU,
+        nameEN,
+        thumbnail,
+        movieId,
+      });
+    }
+    await newOrModifiedMovie.owner.addToSet(userId);
+    await newOrModifiedMovie.save();
+
+    newOrModifiedMovie = await newOrModifiedMovie.populate('owner').execPopulate();
+
+    res.send(newOrModifiedMovie);
   } catch (error) {
     next(error);
   }
 };
 
-const removeLikedMovie = async (req, res, next) => {
+const dislikeMovie = async (req, res, next) => {
+  const { movieId } = req.params;
+  const userId = req.user._id;
   try {
-    const movieToRemove = await Movie.findById(req.params.movieId);
+    const movieToDislike = await Movie.findOne({ movieId });
 
-    if (!movieToRemove) throw new NotFoundError('Запрашиваемый фильм не найден');
+    if (!movieToDislike) throw new NotFoundError('Запрашиваемый фильм не найден');
 
-    if (movieToRemove.owner._id.toHexString() !== req.user._id) {
+    if (!movieToDislike.owner.includes(req.user._id)) {
       throw new ForbiddenError('Недостаточно прав');
     }
 
-    await Movie.findByIdAndRemove(req.params.movieId);
+    await movieToDislike.owner.pull(userId);
+    await movieToDislike.save();
+    if (movieToDislike.owner.length === 0) {
+      await Movie.findByIdAndDelete(movieToDislike._id);
+    }
     res.send({ message: 'Фильм исключен из списка понравившихся' });
   } catch (error) {
     next(error);
@@ -65,6 +81,6 @@ const removeLikedMovie = async (req, res, next) => {
 
 module.exports = {
   readMovies,
-  createMovie,
-  removeLikedMovie,
+  createOrLikeExistedMovie,
+  dislikeMovie,
 };
