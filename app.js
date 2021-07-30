@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
 app.use(cors(corsOptions));
-
+app.set('trust proxy', 1);
 app.use(rateLimiter);
 app.use(router);
 
