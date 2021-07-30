@@ -4,7 +4,7 @@ const NotFoundError = require('../errors/not-found-err');
 
 const readMovies = async (req, res, next) => {
   try {
-    const movies = await Movie.find({}).populate(['owner']);
+    const movies = await Movie.find({ owner: { $in: req.user._id } });
     res.send(movies);
   } catch (error) {
     next(error);
@@ -28,7 +28,7 @@ const createOrLikeExistedMovie = async (req, res, next) => {
   const userId = req.user._id;
 
   try {
-    let newOrModifiedMovie = await Movie.findOne({ movieId });
+    let newOrModifiedMovie = await Movie.findOne({ movieId }).select('+owner');
 
     if (!newOrModifiedMovie) {
       newOrModifiedMovie = await Movie.create({
@@ -48,8 +48,6 @@ const createOrLikeExistedMovie = async (req, res, next) => {
     await newOrModifiedMovie.owner.addToSet(userId);
     await newOrModifiedMovie.save();
 
-    newOrModifiedMovie = await newOrModifiedMovie.populate('owner').execPopulate();
-
     res.send(newOrModifiedMovie);
   } catch (error) {
     next(error);
@@ -60,7 +58,7 @@ const dislikeMovie = async (req, res, next) => {
   const { movieId } = req.params;
   const userId = req.user._id;
   try {
-    const movieToDislike = await Movie.findOne({ movieId });
+    const movieToDislike = await Movie.findOne({ movieId }).select('+owner');
 
     if (!movieToDislike) throw new NotFoundError('Запрашиваемый фильм не найден');
 
