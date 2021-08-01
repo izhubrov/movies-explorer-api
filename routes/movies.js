@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const {
-  readMovies, createOrLikeExistedMovie, dislikeMovie,
+  readMovies, saveMovie, deleteSavedMovie,
 } = require('../controllers/movies');
 const celebrateValidation = require('../helpers/celebrateValidation');
 
@@ -19,7 +19,7 @@ router.post('/', celebrateValidation({
     thumbnail: null,
     movieId: null,
   },
-}), createOrLikeExistedMovie);
-router.delete('/:movieId', celebrateValidation({ params: { movieId: null } }), dislikeMovie);
+}), saveMovie);
+router.delete('/:movieId', celebrateValidation({ params: { id: null } }), deleteSavedMovie);
 
 module.exports = router;

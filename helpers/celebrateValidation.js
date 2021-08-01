@@ -41,14 +41,12 @@ const items = {
     .required()
     .pattern(new RegExp(urlRegExp))
     .messages({ ...string, ...required, ...url }),
-  userId: Joi.string().trim().label('ID Пользователя').required()
+  id: Joi.string().trim().label('ID')
     .hex()
     .length(24)
     .messages({ ...string, ...id }),
-  movieId: Joi.string().trim().label('ID фильма').required()
-    .hex()
-    .length(24)
-    .messages({ ...string, ...id }),
+  movieId: Joi.number().label('ID фильма').required()
+    .messages({ ...number, ...required }),
   nameRU: Joi.string().trim().label('Название фильма на русском языке').required()
     .pattern(new RegExp(ruRegExp))
     .messages({ ...string, ...required, ...ru }),

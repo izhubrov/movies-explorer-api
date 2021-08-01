@@ -13,10 +13,10 @@ router.get('/crash-test', () => {
 });
 router.post('/signin', celebrateValidation({ body: { email: null, password: null } }), login);
 router.post('/signup', celebrateValidation({ body: { email: null, password: null, name: null } }), createUser);
-router.post('/signout', celebrateValidation({ body: { email: null } }), signout);
+router.post('/signout', auth, celebrateValidation({ body: { email: null } }), signout);
 router.use('/users', auth, usersRouter);
 router.use('/movies', auth, moviesRouter);
-router.use('*', (req, res, next) => {
+router.use('*', auth, (req, res, next) => {
   const error = new NotFoundError('Запрашиваемый ресурс не найден');
   next(error);
 });

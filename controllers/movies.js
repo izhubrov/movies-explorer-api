@@ -4,14 +4,14 @@ const NotFoundError = require('../errors/not-found-err');
 
 const readMovies = async (req, res, next) => {
   try {
-    const movies = await Movie.find({ owner: { $in: req.user._id } });
+    const movies = await Movie.find({ owner: req.user._id });
     res.send(movies);
   } catch (error) {
     next(error);
   }
 };
 
-const createOrLikeExistedMovie = async (req, res, next) => {
+const saveMovie = async (req, res, next) => {
   const {
     country,
     director,
@@ -28,50 +28,40 @@ const createOrLikeExistedMovie = async (req, res, next) => {
   const userId = req.user._id;
 
   try {
-    let newOrModifiedMovie = await Movie.findOne({ movieId }).select('+owner');
+    const savedMovie = await Movie.create({
+      country,
+      director,
+      duration,
+      year,
+      description,
+      image,
+      trailer,
+      nameRU,
+      nameEN,
+      thumbnail,
+      movieId,
+      owner: userId,
+    });
 
-    if (!newOrModifiedMovie) {
-      newOrModifiedMovie = await Movie.create({
-        country,
-        director,
-        duration,
-        year,
-        description,
-        image,
-        trailer,
-        nameRU,
-        nameEN,
-        thumbnail,
-        movieId,
-      });
-    }
-    await newOrModifiedMovie.owner.addToSet(userId);
-    await newOrModifiedMovie.save();
-
-    res.send(newOrModifiedMovie);
+    res.send(savedMovie);
   } catch (error) {
     next(error);
   }
 };
 
-const dislikeMovie = async (req, res, next) => {
+const deleteSavedMovie = async (req, res, next) => {
   const { movieId } = req.params;
   const userId = req.user._id;
   try {
-    const movieToDislike = await Movie.findOne({ movieId }).select('+owner');
+    const movieToRemove = await Movie.findById(movieId);
 
-    if (!movieToDislike) throw new NotFoundError('Запрашиваемый фильм не найден');
+    if (!movieToRemove) throw new NotFoundError('Запрашиваемый фильм не найден');
 
-    if (!movieToDislike.owner.includes(req.user._id)) {
+    if (movieToRemove.owner.toHexString() !== userId) {
       throw new ForbiddenError('Недостаточно прав');
     }
-
-    await movieToDislike.owner.pull(userId);
-    await movieToDislike.save();
-    if (movieToDislike.owner.length === 0) {
-      await Movie.findByIdAndDelete(movieToDislike._id);
-    }
-    res.send({ message: 'Фильм исключен из списка понравившихся' });
+    await movieToRemove.remove();
+    res.send({ message: 'Фильм исключен из списка сохраненных' });
   } catch (error) {
     next(error);
   }
@@ -79,6 +69,6 @@ const dislikeMovie = async (req, res, next) => {
 
 module.exports = {
   readMovies,
-  createOrLikeExistedMovie,
-  dislikeMovie,
+  saveMovie,
+  deleteSavedMovie,
 };

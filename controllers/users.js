@@ -3,6 +3,7 @@ const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/user');
 const UnauthorizedError = require('../errors/unauthorized-err');
 const NotFoundError = require('../errors/not-found-err');
+const ConflictError = require('../errors/conflict-err');
 const { randomString } = require('../utils/utils');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -24,11 +25,6 @@ const login = async (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : randomString,
         { expiresIn: '7d' },
       );
-      // res.status(200).cookie('jwt', token, {
-      //   maxAge: 3600000 * 24 * 7, httpOnly: true, domain: '.nomoredomains.monster',
-      // secure: true, path: '/',
-      // })
-      //   .send({ message: 'Вы успешно авторизованы!' });
       res.status(200).cookie('jwt', token, { maxAge: 3600000 * 24 * 7 })
         .send({ name: user.name, message: 'Вы успешно авторизованы!' });
     }
@@ -62,10 +58,6 @@ const signout = async (req, res, next) => {
         throw new UnauthorizedError('Необходима авторизация');
       }
     });
-    // res.status(200).clearCookie('jwt', {
-    //   httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
-    // })
-    //   .send({ message: 'Вы успешно вышли из системы!' });
     res.status(200).clearCookie('jwt')
       .send({ message: 'Вы успешно вышли из системы!' });
   } catch (error) {
@@ -89,7 +81,12 @@ const createUser = async (req, res, next) => {
       name: user.name, email: user.email,
     });
   } catch (error) {
-    next(error);
+    let err = error;
+    const { name, code } = err;
+    if (name === 'MongoError' && code === 11000) {
+      err = new ConflictError('Пользователь с такой почтой уже существует');
+    }
+    next(err);
   }
 };
 
