@@ -125,7 +125,12 @@ const setUserInfo = async (req, res, next) => {
 
     res.send(updatedUser);
   } catch (error) {
-    next(error);
+    let err = error;
+    const { name, code } = err;
+    if (name === 'MongoError' && code === 11000) {
+      err = new ConflictError('Пользователь с такой почтой уже существует');
+    }
+    next(err);
   }
 };
 
