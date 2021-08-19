@@ -20,6 +20,6 @@ router.post('/', celebrateValidation({
     movieId: null,
   },
 }), saveMovie);
-router.delete('/:movieId', celebrateValidation({ params: { id: null } }), deleteSavedMovie);
+router.delete('/:movieId', celebrateValidation({ params: { movieId: null } }), deleteSavedMovie);
 
 module.exports = router;
