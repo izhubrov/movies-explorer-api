@@ -5,7 +5,7 @@ const {
 const errorMessages = require('../utils/celebrateErrorMessages');
 
 const {
-  string, number, required, email, password, id, text, url, ru, eng,
+  string, number, required, email, password, id, text, url,
 } = errorMessages;
 
 const items = {
@@ -48,11 +48,9 @@ const items = {
   movieId: Joi.number().label('ID фильма').required()
     .messages({ ...number, ...required }),
   nameRU: Joi.string().trim().label('Название фильма на русском языке').required()
-    .pattern(new RegExp(ruRegExp))
-    .messages({ ...string, ...required, ...ru }),
+    .messages({ ...string, ...required }),
   nameEN: Joi.string().trim().label('Название фильма на английском языке').required()
-    .pattern(new RegExp(engRegExp))
-    .messages({ ...string, ...required, ...eng }),
+    .messages({ ...string, ...required }),
 };
 
 // Функция ниже конструирует нужный объект из параметров на входе и внутреннего объекта,
