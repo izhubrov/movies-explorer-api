@@ -53,7 +53,7 @@ const deleteSavedMovie = async (req, res, next) => {
   const { movieId } = req.params;
   const userId = req.user._id;
   try {
-    const movieToRemove = await Movie.findOne({ movieId });
+    const movieToRemove = await Movie.findOne({ movieId, owner: userId });
 
     if (!movieToRemove) throw new NotFoundError('Запрашиваемый фильм не найден');
 
