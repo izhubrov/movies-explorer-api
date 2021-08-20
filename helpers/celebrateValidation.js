@@ -1,6 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const {
-  urlRegExp, passwordRegExp, ruRegExp, engRegExp,
+  urlRegExp, passwordRegExp,
 } = require('../utils/utils');
 const errorMessages = require('../utils/celebrateErrorMessages');
 
