@@ -25,7 +25,15 @@ const login = async (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : randomString,
         { expiresIn: '7d' },
       );
-      res.status(200).cookie('jwt', token, { maxAge: 3600000 * 24 * 7 })
+      res
+        .status(200)
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          domain: '.nomoredomains.monster',
+          secure: true,
+          path: '/',
+        })
         .send({ name: user.name, message: 'Вы успешно авторизованы!' });
     }
   } catch (error) {
@@ -48,17 +56,25 @@ const signout = async (req, res, next) => {
 
     if (!user) throw new NotFoundError('Пользователь с такой почтой не найден');
 
-    jsonwebtoken.verify(jwt, NODE_ENV === 'production' ? JWT_SECRET : randomString, (err, decoded) => {
-      if (err) {
-        throw new UnauthorizedError('Необходима авторизация');
-      }
-      verifiedUser = decoded;
+    jsonwebtoken.verify(
+      jwt,
+      NODE_ENV === 'production' ? JWT_SECRET : randomString,
+      (err, decoded) => {
+        if (err) {
+          throw new UnauthorizedError('Необходима авторизация');
+        }
+        verifiedUser = decoded;
 
-      if (user._id.toHexString() !== verifiedUser._id) {
-        throw new UnauthorizedError('Необходима авторизация');
-      }
-    });
-    res.status(200).clearCookie('jwt')
+        if (user._id.toHexString() !== verifiedUser._id) {
+          throw new UnauthorizedError('Необходима авторизация');
+        }
+      },
+    );
+    res
+      .status(200)
+      .clearCookie('jwt', {
+        httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
+      })
       .send({ message: 'Вы успешно вышли из системы!' });
   } catch (error) {
     next(error);
@@ -67,18 +83,19 @@ const signout = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
   try {
-    const {
-      email, password, name,
-    } = req.body;
+    const { email, password, name } = req.body;
 
     const hash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name, email, password: hash,
+      name,
+      email,
+      password: hash,
     });
 
     res.send({
-      name: user.name, email: user.email,
+      name: user.name,
+      email: user.email,
     });
   } catch (error) {
     let err = error;
