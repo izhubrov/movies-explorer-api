@@ -7,8 +7,8 @@ const mongoSettings = {
 
 const corsOptions = {
   origin: [
-    // '*',
     'https://izhubrov-mov-explorer.nomoredomains.monster',
+    'http://localhost:3000',
   ],
   credentials: true,
 };

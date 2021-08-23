@@ -27,13 +27,14 @@ const login = async (req, res, next) => {
       );
       res
         .status(200)
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          domain: '.nomoredomains.monster',
-          secure: true,
-          path: '/',
-        })
+        // .cookie('jwt', token, {
+        //   maxAge: 3600000 * 24 * 7,
+        //   httpOnly: true,
+        //   domain: '.nomoredomains.monster',
+        //   secure: true,
+        //   path: '/',
+        // })
+        .cookie('jwt', token, { maxAge: 3600000 * 24 * 7 })
         .send({ name: user.name, message: 'Вы успешно авторизованы!' });
     }
   } catch (error) {
@@ -72,9 +73,13 @@ const signout = async (req, res, next) => {
     );
     res
       .status(200)
-      .clearCookie('jwt', {
-        httpOnly: true, domain: '.nomoredomains.monster', secure: true, path: '/',
-      })
+      // .clearCookie('jwt', {
+      //   httpOnly: true,
+      //   domain: '.nomoredomains.monster',
+      //   secure: true,
+      //   path: '/',
+      // })
+      .clearCookie('jwt')
       .send({ message: 'Вы успешно вышли из системы!' });
   } catch (error) {
     next(error);
