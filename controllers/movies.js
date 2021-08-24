@@ -42,7 +42,6 @@ const saveMovie = async (req, res, next) => {
       movieId,
       owner: userId,
     });
-
     res.send(savedMovie);
   } catch (error) {
     next(error);
