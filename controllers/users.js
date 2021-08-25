@@ -32,6 +32,7 @@ const login = async (req, res, next) => {
         //   httpOnly: true,
         //   domain: '.nomoredomains.monster',
         //   secure: true,
+        //   sameSite: Strict,
         //   path: '/',
         // })
         .cookie('jwt', token, { maxAge: 3600000 * 24 * 7 })
@@ -77,6 +78,7 @@ const signout = async (req, res, next) => {
       //   httpOnly: true,
       //   domain: '.nomoredomains.monster',
       //   secure: true,
+      //   sameSite: Strict,
       //   path: '/',
       // })
       .clearCookie('jwt')
