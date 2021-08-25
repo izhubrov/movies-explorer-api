@@ -25,18 +25,23 @@ const login = async (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : randomString,
         { expiresIn: '7d' },
       );
-      res
-        .status(200)
-        // .cookie('jwt', token, {
-        //   maxAge: 3600000 * 24 * 7,
-        //   httpOnly: true,
-        //   domain: '.nomoredomains.monster',
-        //   secure: true,
-        //   sameSite: Strict,
-        //   path: '/',
-        // })
-        .cookie('jwt', token, { maxAge: 3600000 * 24 * 7 })
-        .send({ name: user.name, message: 'Вы успешно авторизованы!' });
+      res.status(200);
+      if (NODE_ENV === 'production') {
+        res.cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          domain: '.nomoredomains.monster',
+          secure: true,
+          sameSite: 'strict',
+          path: '/',
+        });
+      } else {
+        res.cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          sameSite: 'strict',
+        });
+      }
+      res.send({ name: user.name, message: 'Вы успешно авторизованы!' });
     }
   } catch (error) {
     next(error);
@@ -72,17 +77,19 @@ const signout = async (req, res, next) => {
         }
       },
     );
-    res
-      .status(200)
-      // .clearCookie('jwt', {
-      //   httpOnly: true,
-      //   domain: '.nomoredomains.monster',
-      //   secure: true,
-      //   sameSite: Strict,
-      //   path: '/',
-      // })
-      .clearCookie('jwt')
-      .send({ message: 'Вы успешно вышли из системы!' });
+    res.status(200);
+    if (NODE_ENV === 'production') {
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        domain: '.nomoredomains.monster',
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+      });
+    } else {
+      res.clearCookie('jwt', { sameSite: 'strict' });
+    }
+    res.send({ message: 'Вы успешно вышли из системы!' });
   } catch (error) {
     next(error);
   }

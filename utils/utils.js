@@ -1,3 +1,4 @@
+const { NODE_ENV } = process.env;
 const mongoSettings = {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -5,11 +6,12 @@ const mongoSettings = {
   useUnifiedTopology: true,
 };
 
+const corsOrigin = NODE_ENV === 'production'
+  ? 'https://izhubrov-mov-explorer.nomoredomains.monster'
+  : 'http://localhost:3000';
+
 const corsOptions = {
-  origin: [
-    'https://izhubrov-mov-explorer.nomoredomains.monster',
-    'http://localhost:3000',
-  ],
+  origin: [corsOrigin],
   credentials: true,
 };
 
